@@ -3,21 +3,22 @@ entry_message = """
 """
 
 # link to the source code of the bot
-repo = 'https://github.com/Willow-et-al/ivu-bot'
+repo = 'https://github.com/Remnant-et-al/ivu-bot'
 
-[ids]
-# the role required to use the set-password command.
-# this doesn't actually need to have administrator permissions,
-# it's just a marker for the bot.
-admin_role = 1234
 # the channel that newcomers will be reminded to enter the password
 # if 0, disable the welcome message
 entry_channel = 5678
+
+[roles]
+# the role required to use the set-password command.
+# this doesn't actually need to have administrator permissions,
+# it's just a marker for the bot.
+admin = 1234
 # the role that will be granted to people that entered the password
-grant_role = 9876
+grant = 9876
 # the role that will be removed when the grant role is granted
 # set to 0 to disable
-remove_role = 0
+remove = 0
 
 [tokens]
 discord = '...'

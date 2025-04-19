@@ -1,5 +1,7 @@
 config.toml
 password.txt
+# this isn't used anymore but we still don't want it committed
+passwords.toml
 license-notice.txt
 
 __pycache__/

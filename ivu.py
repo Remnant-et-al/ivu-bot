@@ -18,7 +18,7 @@ class IvuBot(bot_bin.bot.Bot):
 			config = toml.load(f)
 
 		# only enable member join event if we really need it
-		if config['ids']['entry_channel']:
+		if config['entry_channel']:
 			intents.members = True
 
 		super().__init__(*args, intents=intents, config=config, **kwargs)

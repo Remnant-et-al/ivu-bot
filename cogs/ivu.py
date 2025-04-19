@@ -8,7 +8,7 @@ from discord import app_commands
 logger = logging.getLogger('cogs.ivu')
 
 def has_ivu_admin_role(ctx):
-	role_id = ctx.bot.config['ids']['admin_role']
+	role_id = ctx.bot.config['roles']['admin']
 	if ctx.author.get_role(role_id) is None:
 		raise commands.MissingRole(role_id)
 	return True
@@ -27,7 +27,7 @@ class Ivu(commands.Cog):
 
 	@commands.Cog.listener()
 	async def on_member_join(self, member):
-		entry_channel_id = self.bot.config['ids']['entry_channel']
+		entry_channel_id = self.bot.config['entry_channel']
 
 		if not entry_channel_id:
 			return
@@ -45,7 +45,7 @@ class Ivu(commands.Cog):
 
 	@app_commands.command(name='password')
 	async def password_command(self, interaction, password: str):
-		grant_role = interaction.guild.get_role(self.bot.config['ids']['grant_role'])
+		grant_role = interaction.guild.get_role(self.bot.config['roles']['grant'])
 		if grant_role in interaction.user.roles:
 			await interaction.response.send_message(
 				f'Sorry, but you already have the {grant_role} role. '
@@ -60,7 +60,7 @@ class Ivu(commands.Cog):
 
 		await interaction.user.add_roles(grant_role)
 
-		if remove_role_id := self.bot.config['ids']['remove_role']:
+		if remove_role_id := self.bot.config['roles']['remove']:
 			remove_role = interaction.guild.get_role(remove_role_id)
 			await interaction.user.remove_roles(remove_role)
 
