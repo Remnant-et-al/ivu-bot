@@ -7,11 +7,24 @@ from discord import app_commands
 
 logger = logging.getLogger('cogs.ivu')
 
-def has_ivu_admin_role(ctx):
-	role_id = ctx.bot.config['roles']['admin']
-	if ctx.author.get_role(role_id) is None:
-		raise commands.MissingRole(role_id)
-	return True
+def _has_role(ctx, role_name: str):
+	role_id = ctx.bot.config['roles'][role_name]
+	return ctx.author.get_role(role_id) is not None
+
+# able to set passwords
+def is_helper(ctx):
+	# assume that organizer implies helper
+	if _has_role(ctx, 'helper') or _has_role(ctx, 'organizer'):
+		return True
+
+	raise commands.CommandError('You need either the Helper or Organizer role to run this command.')
+
+# able to ban
+def is_organizer(ctx):
+	if _has_role(ctx, 'organizer'):
+		return True
+
+	raise commands.CommandError('You need the Organizer role to run this command.')
 
 class Ivu(commands.Cog):
 	def __init__(self, bot):
@@ -24,24 +37,6 @@ class Ivu(commands.Cog):
 	def _set_password(self, password):
 		# for CTF style fun
 		self.passwords = {password, base64.b64encode(password.encode()).decode()}
-
-	@commands.Cog.listener()
-	async def on_member_join(self, member):
-		entry_channel_id = self.bot.config['entry_channel']
-
-		if not entry_channel_id:
-			return
-
-		entry_channel = member.guild.get_channel(entry_channel_id)
-		if entry_channel is None:
-			logger.error('Member joined but entry channel %s not found!', entry_channel_id)
-			return
-
-		# if we send the message too quickly, the user might not see it, if
-		# message history is disabled in the welcome channel
-		# (as it should be)
-		await asyncio.sleep(0.7)
-		await entry_channel.send(self.bot.config['entry_message'])
 
 	@app_commands.command(name='password')
 	async def password_command(self, interaction, password: str):
@@ -66,13 +61,27 @@ class Ivu(commands.Cog):
 
 		await interaction.response.send_message(f'Thanks! You have been granted the {grant_role} role.', ephemeral=True)
 
+	# we avoid using interactions commands for these because those are visible to all users
+
 	@commands.command(name='set-password')
-	@commands.check(has_ivu_admin_role)
+	@commands.check(is_helper)
 	async def set_password(self, ctx, password):
 		with open('password.txt', 'w') as f:
 			f.write(password)
 		self._set_password(password)
 		await ctx.message.add_reaction(self.bot.config['success_emojis'][True])
+
+	@commands.command()
+	@commands.check(is_organizer)
+	async def ban(self, ctx, user: discord.Member | discord.User | discord.Object, *, reason: str = None):
+		try:
+			await ctx.guild.ban(user, reason=reason)
+		except discord.Forbidden as exc:
+			await ctx.send(f"I don't have permission to ban {user}. Details: {exc.text}. Code: {exc.code}.")
+		else:
+			async with asyncio.TaskGroup() as tg:
+				tg.create_task(ctx.message.add_reaction(self.bot.config['success_emojis'][True]))
+				tg.create_task(ctx.send(f'Banned {user}.'))
 
 async def setup(bot):
 	await bot.add_cog(Ivu(bot))

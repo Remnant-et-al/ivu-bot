@@ -1,22 +1,16 @@
-# what to be sent in the entry channel when a new user joins
-entry_message = """
-"""
-
 # link to the source code of the bot
 repo = 'https://github.com/Remnant-et-al/ivu-bot'
 
-# the channel that newcomers will be reminded to enter the password
-# if 0, disable the welcome message
-entry_channel = 5678
-
 [roles]
-# the role required to use the set-password command.
-# this doesn't actually need to have administrator permissions,
+# the role ID required to ban people
+# this doesn't actually need to have any sort of permissions,
 # it's just a marker for the bot.
-admin = 1234
-# the role that will be granted to people that entered the password
+organizer = 5678
+# the role ID required to use the set-password command.
+helper = 1234
+# the role ID that will be granted to people that entered the password
 grant = 9876
-# the role that will be removed when the grant role is granted
+# the role ID that will be removed when the grant role is granted
 # set to 0 to disable
 remove = 0
 
